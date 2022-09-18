@@ -7,7 +7,7 @@
 export const pick = (obj, ...fields) => {
   const newObj = {};
   Object.entries(obj).map(([key, value]) => {
-    if (fields.indexOf(key) !== -1) {
+    if (fields.includes(key)) {
       newObj[key] = value;
     }
   });
