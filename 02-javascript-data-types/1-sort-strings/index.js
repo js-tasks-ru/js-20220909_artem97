@@ -17,5 +17,5 @@ export function sortStrings(arr, param = 'asc') {
 }
 
 function comp(a, b) {
-  return (a < b && a.toLowerCase() === b.toLowerCase()) ? -1 : a.toLowerCase().localeCompare(b.toLowerCase(), { ignorePunctuation: true });
+  return a.localeCompare(b, ['ru', 'en'], { sensitivity: 'variant', caseFirst: 'upper' });
 }
