@@ -8,7 +8,7 @@ export function createGetter(field) {
   let tempObj;
   return function getParam(obj, index = 0){
     tempObj = obj[pathArr[index]]; //стоит в таких случаях делать временную переменную или лучше обращаться каждый раз к переменным объекта?
-    return (typeof(tempObj) === "object")? getParam(tempObj, index + 1) : tempObj;
-  }  
+    return (Object.prototype.toString.call(tempObj) === '[object Object]')? getParam(tempObj, index + 1) : tempObj;
+  }
 }
 

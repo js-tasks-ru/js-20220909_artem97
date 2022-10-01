@@ -104,14 +104,7 @@ body {
   text-decoration: none;
 }
 
-.column-chart__header {
-  font-weight: 600;
-  font-size: 28px;
-  line-height: 35px;
-  color: var(--dark-blue);
-  margin-bottom: 28px;
-  position: relative;
-}
+
 
 .column-chart_loading .column-chart__header,
 .column-chart_loading .column-chart__chart {
