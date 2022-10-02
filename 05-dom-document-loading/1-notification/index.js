@@ -29,13 +29,15 @@ export default class NotificationMessage {
     this.element = notificationMessage.firstElementChild;
   }
 
-  show(elem = ''){
+  show(elem = '') {
     (elem === '')
-    ? this.render()
-    : this.element = elem;
+      ? this.render()
+      : this.element = elem;
 
     document.body.append(this.element);
-    setTimeout(() => { this.remove() }, this.duration );
+    setTimeout(() => {
+      this.remove()
+    }, this.duration);
   }
 
   remove() {
@@ -50,6 +52,7 @@ export default class NotificationMessage {
   destroy() {
     this.remove();
   }
+
   // destroy() {
   //   document.getElementById("notificationMess").remove();
   // }
