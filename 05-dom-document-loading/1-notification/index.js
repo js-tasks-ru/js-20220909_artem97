@@ -1,11 +1,13 @@
 export default class NotificationMessage {
 
+  static activeNotification;
+
   constructor(message = '', {duration = 0, type = "error"} = {}) {
     this.message = message;
     this.duration = duration;
     this.type = type;
 
-    this.show()
+    this.render()
   }
 
   getTemplate() {
@@ -23,41 +25,36 @@ export default class NotificationMessage {
   }
 
   render() {
-    
-    if(document.querySelector(`.${this.type}`)){
-      document.querySelector(`.${this.type}`).remove();
-    }
-    
-    const notificationMessage = document.createElement('div');
+    const element = document.createElement('div');
 
-    notificationMessage.innerHTML = this.getTemplate();
-    this.element = notificationMessage.firstElementChild;
+    element.innerHTML = this.getTemplate();
+    this.element = element.firstElementChild;
   }
 
-  show(elem = '') {
-    (elem === '')
-      ? this.render()
-      : this.element = elem;
-
+  show(parent = document.body) {
+    if(NotificationMessage.activeNotification){
+      NotificationMessage.activeNotification.remove();
+    }
     document.body.append(this.element);
-    // this.element.addEventListener('animationend', () => {
-    //   this.remove();
-    // }) - Работает правельнее через этот метод, но тесты не пропускают, ждут метода setTimeout
-    setTimeout(()=>{
-      this.remove()
-    }, this.duration)
+
+    this.timer = setTimeout(() => {
+      this.remove();
+    }, this.duration);
+
+    NotificationMessage.activeNotification = this;
   }
 
   remove() {
+    clearTimeout(this.timer);
+
     if (this.element) {
-      let elements = document.querySelectorAll('.notification');
-      for (let elem of elements) {
-        elem.remove();
-      }
+      this.element.remove();
     }
   }
 
   destroy() {
     this.remove();
+    this.element = null;
+    NotificationMessage.activeNotification = null;
   }
 }
