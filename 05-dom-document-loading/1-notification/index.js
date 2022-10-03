@@ -42,7 +42,7 @@ export default class NotificationMessage {
     document.body.append(this.element);
     // this.element.addEventListener('animationend', () => {
     //   this.remove();
-    // })
+    // }) - Работает правельнее через этот метод, но тесты не пропускают, ждут метода setTimeout
     setTimeout(()=>{
       this.remove()
     }, this.duration)
