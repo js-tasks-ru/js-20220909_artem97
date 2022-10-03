@@ -50,21 +50,23 @@ export default class SortableTable {
     ).join("");
   }
 
-  sortData(data, direction) {
-    const arr = [...data]
+  sortData(data, order) {
+    const arr = [...data];
     const directions = {
       asc: 1,
       desc: -1
-    }
+    };
+
     this.comp = function (a, b) {
-      if ((typeof (a[this.fieldValue]) === "string")) {
-        return a[this.fieldValue].localeCompare(b[this.fieldValue], ['ru', 'en'], {
-          sensitivity: 'variant',
-          caseFirst: 'upper'
-        }) * directions[direction];
-      }
-      if ((typeof (a[this.fieldValue]) === "number")) {
-        return (a[this.fieldValue] - b[this.fieldValue]) * directions[direction];
+      switch (typeof (a[this.fieldValue])) {
+        case "string" :
+          return a[this.fieldValue].localeCompare(b[this.fieldValue], ['ru', 'en'], {
+            sensitivity: 'variant',
+            caseFirst: 'upper'
+          }) * directions[order];
+
+        case "number" :
+          return (a[this.fieldValue] - b[this.fieldValue]) * directions[order];
       }
     }
 
