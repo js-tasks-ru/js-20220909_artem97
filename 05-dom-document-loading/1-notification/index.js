@@ -23,6 +23,11 @@ export default class NotificationMessage {
   }
 
   render() {
+    
+    if(document.querySelector(`.${this.type}`)){
+      document.querySelector(`.${this.type}`).remove();
+    }
+    
     const notificationMessage = document.createElement('div');
 
     notificationMessage.innerHTML = this.getTemplate();
@@ -35,9 +40,12 @@ export default class NotificationMessage {
       : this.element = elem;
 
     document.body.append(this.element);
-    setTimeout(() => {
+    // this.element.addEventListener('animationend', () => {
+    //   this.remove();
+    // })
+    setTimeout(()=>{
       this.remove()
-    }, this.duration);
+    }, this.duration)
   }
 
   remove() {
@@ -52,8 +60,4 @@ export default class NotificationMessage {
   destroy() {
     this.remove();
   }
-
-  // destroy() {
-  //   document.getElementById("notificationMess").remove();
-  // }
 }
