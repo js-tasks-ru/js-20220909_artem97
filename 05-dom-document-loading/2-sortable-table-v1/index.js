@@ -93,7 +93,7 @@ export default class SortableTable {
     this.fieldValue = fieldValue;
     this.orderValue = orderValue;
 
-    this.destroy();
+    this.remove();
     this.render();
   }
 
