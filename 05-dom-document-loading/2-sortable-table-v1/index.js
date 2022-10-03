@@ -2,7 +2,7 @@ export default class SortableTable {
 
   fieldValue;
   orderValue;
-  subElements;
+  subElements = {};
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
@@ -40,40 +40,53 @@ export default class SortableTable {
   }
 
   getBodyList() {
+    return this.sortData(this.data, this.orderValue).map(item => {
+        return `
+            <a href="#" class="sortable-table__row">
+              ${this.getTableRow(item)}
+            </a>
+            `;
+      }
+    ).join("");
+  }
+
+  sortData(data, direction) {
+    const arr = [...data]
+    const directions = {
+      asc: 1,
+      desc: -1
+    }
     this.comp = function (a, b) {
       if ((typeof (a[this.fieldValue]) === "string")) {
         return a[this.fieldValue].localeCompare(b[this.fieldValue], ['ru', 'en'], {
           sensitivity: 'variant',
           caseFirst: 'upper'
-        });
+        }) * directions[direction];
       }
       if ((typeof (a[this.fieldValue]) === "number")) {
-        return a[this.fieldValue] - b[this.fieldValue];
+        return (a[this.fieldValue] - b[this.fieldValue]) * directions[direction];
       }
     }
-    return this.data
-      .sort((a, b) => {
-        if (this.orderValue === 'asc') {
-          return this.comp(a, b)
-        }
-        if (this.orderValue === 'desc') {
-          return this.comp(b, a);
-        }
-      })
-      .map(item => {
-          return `
-            <a href="#" class="sortable-table__row">
-              <div class="sortable-table__cell">
-                <img class="sortable-table-image" alt="Image" src="${item['id']}"></div>
-              <div class="sortable-table__cell">${item['title']}</div>
 
-              <div class="sortable-table__cell">${item['quantity']}</div>
-              <div class="sortable-table__cell">${item['price']}</div>
-              <div class="sortable-table__cell">${item['sales']}</div>
-            </a>
-            `;
-        }
-      ).join("");
+    return arr
+      .sort((a, b) => {
+        return this.comp(a, b)
+      })
+  }
+
+  getTableRow(item) {
+    const cells = this.headerConfig.map(({id, template}) => {
+      return {
+        id,
+        template
+      };
+    });
+
+    return cells.map(({id, template}) => {
+      return template
+        ? template(item[id])
+        : `<div class="sortable-table__cell">${item[id]}</div>`
+    }).join("");
   }
 
   sort(fieldValue = this.fieldValue, orderValue = this.orderValue) {
@@ -89,24 +102,23 @@ export default class SortableTable {
     const table = document.createElement('div');
 
     table.innerHTML = this.getTemplate();
-    this.element = table.firstElementChild;
+    const element = table.firstElementChild;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      this.getSubElements();
-    });
+    this.element = element;
+    this.subElements = this.getSubElements(element);
+
   }
 
-  getSubElements() {
+  getSubElements(element) {
     const result = {};
-    const elements = document.querySelectorAll('[data-element]')
+    const elements = element.querySelectorAll('[data-element]')
 
-    for (let subElement of elements) {
+    for (const subElement of elements) {
       const name = subElement.dataset.element
       result[name] = subElement;
     }
-    this.subElements = result;
+    return result;
   }
-
 
 
   remove() {
@@ -117,6 +129,8 @@ export default class SortableTable {
 
   destroy() {
     this.remove();
+    this.element = null;
+    this.subElements = {};
   }
 }
 
