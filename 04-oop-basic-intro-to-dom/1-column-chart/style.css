@@ -113,6 +113,7 @@ body {
   position: relative;
 }
 
+
 .column-chart_loading .column-chart__header,
 .column-chart_loading .column-chart__chart {
   display: none;
