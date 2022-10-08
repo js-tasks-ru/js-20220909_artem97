@@ -35,7 +35,7 @@ export default class NotificationMessage {
     if(NotificationMessage.activeNotification){
       NotificationMessage.activeNotification.remove();
     }
-    document.body.append(this.element);
+    parent.append(this.element);
 
     this.timer = setTimeout(() => {
       this.remove();
