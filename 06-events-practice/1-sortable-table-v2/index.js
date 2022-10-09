@@ -3,6 +3,7 @@ export default class SortableTable {
   fieldValue;
   orderValue;
   subElements = {};
+  isSortLocally = true;
 
   constructor(headerConfig = [], {data, sorted} = []) {
     this.headerConfig = headerConfig;
@@ -32,7 +33,7 @@ export default class SortableTable {
       const order = column.dataset.order = (column.getAttribute('data-order') === 'asc')
         ? 'desc'
         : 'asc'
-      this.sort(column.getAttribute('data-id'), order);
+      this.sortOnClient(column.getAttribute('data-id'), order);
     } else {
       this.element.querySelectorAll('.sortable-table__header .sortable-table__cell').forEach(item => {
         item.removeAttribute('data-order')
@@ -42,7 +43,7 @@ export default class SortableTable {
       })
       column.dataset.order = 'asc'
       column.append(orderElem)
-      this.sort(column.getAttribute('data-id'), 'asc');
+      this.sortOnClient(column.getAttribute('data-id'), 'asc');
     }
   }
 
@@ -140,7 +141,16 @@ export default class SortableTable {
     }).join("");
   }
 
-  sort(fieldValue = this.fieldValue, orderValue = this.orderValue) {
+
+  sort () {
+    if (this.isSortLocally) {
+      this.sortOnClient();
+    } else {
+      //this.sortOnServer();
+    }
+  }
+
+  sortOnClient(fieldValue = this.fieldValue, orderValue = this.orderValue) {
     this.fieldValue = fieldValue;
     this.orderValue = orderValue;
 
