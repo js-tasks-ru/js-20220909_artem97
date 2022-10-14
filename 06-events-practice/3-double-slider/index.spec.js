@@ -71,6 +71,7 @@ describe('events-practice/double-slider', () => {
   });
 
   it('should have ability to move left slider to start boundary', () => {
+
     const leftSlider = doubleSlider.element.querySelector('.range-slider__thumb-left');
     const leftBoundary = doubleSlider.element.querySelector('span[data-element="from"]');
 
@@ -86,6 +87,7 @@ describe('events-practice/double-slider', () => {
     leftSlider.dispatchEvent(down);
     leftSlider.dispatchEvent(move);
 
+    console.log(leftBoundary)
     expect(leftBoundary).toHaveTextContent(doubleSlider.min);
   });
 
