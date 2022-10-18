@@ -32,13 +32,13 @@ export default class DoubleSlider {
     const minValueSpan = this.element.querySelector('#minValue');
     const maxValueSpan = this.element.querySelector('#maxValue');
     const that = this;
-    let wrapper = (event) =>{callBackForListenerMousemove(event)}
-    document.addEventListener('pointermove', wrapper);
+    const getWrapper = (event) =>{callBackForListenerMousemove(event)}
+    document.addEventListener('pointermove', getWrapper);
 
     document.addEventListener('pointerup', () => {
       this.chanceMinValue = minValueSpan.innerHTML;
       this.chanceMaxValue = maxValueSpan.innerHTML;
-      document.removeEventListener('pointermove', wrapper);
+      document.removeEventListener('pointermove', getWrapper);
     });
 
     function callBackForListenerMousemove(event) {
