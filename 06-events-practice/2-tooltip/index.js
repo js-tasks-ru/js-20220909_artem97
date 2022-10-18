@@ -3,6 +3,7 @@ class Tooltip {
   static element;
 
   constructor() {
+    this.controller = new AbortController();
       if (!Tooltip._instance) {
         Tooltip._instance = this;
       }
@@ -10,25 +11,34 @@ class Tooltip {
   }
 
   initialize() {
-    document.addEventListener("pointerover", (item) => {
-      if (item.target.getAttribute('data-tooltip')) {
-        this.message = item.target.getAttribute('data-tooltip');
-        this.render();
-
-        this.addMoveListener(item);
+    document.addEventListener("pointerover", this.onPointerOver, {
+      signal: this.controller.signal
+    });
+    document.addEventListener("pointerout", this.onPointerOut,{
+      signal: this.controller.signal
       }
-
-    })
-    document.addEventListener("pointerout", (item) => {
-      if (item.target.getAttribute('data-tooltip')) {
-        this.destroy()
-      }
-    })
+    );
   }
 
   addMoveListener(item) {
     item.target.append(this.element);
     document.addEventListener('pointermove', this.callBack);
+  }
+
+  onPointerOver = (event) =>  {
+    if (event.target.getAttribute('data-tooltip')) {
+      this.message = event.target.getAttribute('data-tooltip');
+      this.render();
+
+      this.addMoveListener(event);
+    }
+
+  }
+
+  onPointerOut = (event) => {
+    if (event.target.getAttribute('data-tooltip')) {
+      this.destroy()
+    }
   }
 
   callBack = (event) => {
@@ -59,6 +69,9 @@ class Tooltip {
   }
 
   destroy() {
+    //document.removeEventListener('pointerover', this.onPointerOver);
+    //document.removeEventListener('pointerout', this.onPointerOut);
+    this.controller.abort();
     document.removeEventListener('pointermove', this.callBack);
     this.remove();
     this.element = null;

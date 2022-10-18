@@ -16,16 +16,14 @@ export default class SortableTable {
   }
 
   createListener() {
+    this.subElements.header.addEventListener('pointerdown', this.onSortClick);
+  }
 
-    this.element.querySelectorAll('.sortable-table__header .sortable-table__cell').forEach(column => {
-      if (column.getAttribute('data-sortable') === 'true') {
-        column.addEventListener('click', () => {
-          this.callBackForListener(this.renderSort(), column)
-        })
-      }
-    })
-
-
+  onSortClick = event => {
+    const column = event.target.closest('[data-sortable="true"]');
+    if (column) {
+      this.callBackForListener(this.renderSort(), column);
+    }
   }
 
   callBackForListener(orderElem, column) {
@@ -55,8 +53,6 @@ export default class SortableTable {
         <div data-element="header" class="sortable-table__header sortable-table__row">
             ${this.getHeaderList()}
         </div>
-
-
             ${this.getBodyList()}
         </div>
 
@@ -142,7 +138,7 @@ export default class SortableTable {
   }
 
 
-  sort () {
+  sort() {
     if (this.isSortLocally) {
       this.sortOnClient();
     } else {
