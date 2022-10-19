@@ -1,25 +1,41 @@
+import fetchJson from './utils/fetch-json.js';
+
+const BACKEND_URL = 'https://course-js.javascript.ru';
+
 export default class SortableTable {
-
-  fieldValue;
-  orderValue;
+  columnListSize = 0;
   subElements = {};
-  isSortLocally = true;
 
-  constructor(headerConfig = [], {data, sorted} = {}) {
+  constructor(headerConfig = [], {data, sorted = {id: "title", order: "asc"}, isSortLocally = false, url} = {}) {
+
     this.headerConfig = headerConfig;
     this.data = data;
-    this.fieldValue = sorted.id;
-    this.orderValue = sorted.order;
+    this.fieldValue = sorted["id"];
+    this.orderValue = sorted["order"];
+    this.isSortLocally = isSortLocally;
+    this.url = url;
 
     this.render();
     this.createListener();
+
+    if(!isSortLocally) {
+      this.sortOnServer();
+    }
   }
 
   createListener() {
+    this.state = true;
     this.subElements.header.addEventListener('pointerdown', this.onSortClick);
+    window.addEventListener('scroll', () => {
+      if (this.element.clientHeight - (pageYOffset + window.innerHeight) < 0 && this.state === true) {
+        this.state = false;
+        this.sortOnServer();
+      }
+    })
   }
 
   onSortClick = event => {
+    this.columnListSize = 0;
     const column = event.target.closest('[data-sortable="true"]');
     if (column) {
       this.callBackForListener(this.renderSort(), column);
@@ -31,17 +47,17 @@ export default class SortableTable {
       const order = column.dataset.order = (column.getAttribute('data-order') === 'asc')
         ? 'desc'
         : 'asc'
-      this.sortOnClient(column.getAttribute('data-id'), order);
+      this.sort(column.getAttribute('data-id'), order);
     } else {
       this.element.querySelectorAll('.sortable-table__header .sortable-table__cell').forEach(item => {
-        item.removeAttribute('data-order')
+        item.removeAttribute('data-order');
         if (item.querySelector('.sortable-table__sort-arrow')) {
           item.querySelector('.sortable-table__sort-arrow').remove();
         }
-      })
-      column.dataset.order = 'asc'
-      column.append(orderElem)
-      this.sortOnClient(column.getAttribute('data-id'), 'asc');
+      });
+      column.dataset.order = 'asc';
+      column.append(orderElem);
+      this.sort(column.getAttribute('data-id'), 'asc');
     }
   }
 
@@ -138,11 +154,11 @@ export default class SortableTable {
   }
 
 
-  sort() {
+  sort(column, order) {
     if (this.isSortLocally) {
-      this.sortOnClient();
+      this.sortOnClient(column, order);
     } else {
-      //this.sortOnServer();
+      this.sortOnServer(column, order);
     }
   }
 
@@ -153,6 +169,38 @@ export default class SortableTable {
     this.sortData(this.data);
 
     this.subElements.body.innerHTML = this.getBodyList();
+  }
+
+  async sortOnServer(fieldValue = this.fieldValue, orderValue = this.orderValue) {
+    this.newLength = 30;
+    this.fieldValue = fieldValue;
+    this.orderValue = orderValue;
+    await fetchJson(`${BACKEND_URL}/${this.url}?_embed=subcategory.category&_sort=${this.fieldValue}&_order=${this.orderValue}&_start=${this.columnListSize}&_end=${this.columnListSize + this.newLength}`)
+      .then(json => this.data = json);
+
+    if (this.state === true) {
+      this.subElements.body.innerHTML = this.getBodyList();
+      this.columnListSize = this.newLength;
+    } else {
+      this.addColumnList();
+    }
+
+    this.state = true;
+
+  }
+
+  addColumnList() {
+    this.subElements.body.append(...this.renderColumnList());
+    this.columnListSize += this.newLength
+
+  }
+
+  renderColumnList() {
+    const divColumnList = document.createElement('div');
+    divColumnList.innerHTML = this.getBodyList();
+
+    this.columnList = divColumnList.children;
+    return this.columnList;
   }
 
   render() {
@@ -202,4 +250,3 @@ export default class SortableTable {
     this.subElements = {};
   }
 }
-
