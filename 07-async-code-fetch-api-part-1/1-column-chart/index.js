@@ -16,6 +16,7 @@ export default class ColumnChart {
     this.value = 0;
     this.data = [];
     this.url = url;
+    this.url = new URL(url, BACKEND_URL);
     this.from = from;
     this.to = to;
     this.label = label;
@@ -23,24 +24,31 @@ export default class ColumnChart {
     this.formatHeading = formatHeading;
 
     this.render();
-    this.update(this.from, this.to);
+    this.update();
   }
 
-  async update(from, to) {
-    const fromFormat = from.toISOString().split('T')[0];
-    const toFormat = to.toISOString().split('T')[0];
-    await fetchJson(BACKEND_URL + "/" + this.url + "?from=" + fromFormat + "&to=" + toFormat)
-      .then((json) => {
-        this.returnData = json;
-        this.data = Object.values(json);
-      })
-      .then(() => {
-        this.subElements.header.innerHTML = this.formatHeading(this.data.reduce((sum, elem) => {
-          return sum + elem;
-        }));
-        this.element.classList.remove("column-chart_loading");
-        this.renderColumnList()
-      });
+  async loadData(from, to){
+    this.url.searchParams.set('from', from.toISOString().split('T')[0]);
+    this.url.searchParams.set('to', to.toISOString().split('T')[0]);
+
+    try {
+      return await fetchJson(this.url);
+    }catch (error){
+      console.log(error.message)
+    }
+  }
+
+  async update() {
+      const response = await this.loadData(this.from, this.to)
+      this.data = Object.values(response);
+      this.returnData = response;
+
+    this.subElements.header.innerHTML = this.formatHeading(this.data.reduce((sum, elem) => {
+      return sum + elem;
+    }));
+    this.element.classList.remove("column-chart_loading");
+    this.renderColumnList()
+
     return this.returnData;
   }
 

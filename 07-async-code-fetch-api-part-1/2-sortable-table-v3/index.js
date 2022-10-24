@@ -3,35 +3,46 @@ import fetchJson from './utils/fetch-json.js';
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class SortableTable {
+  element;
+  data = [];
   columnListSize = 0;
   subElements = {};
+  newLength = 30;
+  isSortLocally = false;
 
-  constructor(headerConfig = [], {data, sorted = {id: "title", order: "asc"}, isSortLocally = false, url} = {}) {
+  constructor(
+    headerConfig = [], {data, sorted = {id: "title", order: "asc"}, isSortLocally = false, url} = {}) {
 
     this.headerConfig = headerConfig;
     this.data = data;
     this.fieldValue = sorted["id"];
     this.orderValue = sorted["order"];
     this.isSortLocally = isSortLocally;
-    this.url = url;
+    this.url = new URL(url, BACKEND_URL);
 
     this.render();
     this.createListener();
 
-    if(!isSortLocally) {
+    if (!isSortLocally) {
       this.sortOnServer();
+      this.createListenerForServer();
     }
   }
 
   createListener() {
-    this.state = true;
     this.subElements.header.addEventListener('pointerdown', this.onSortClick);
-    window.addEventListener('scroll', () => {
-      if (this.element.clientHeight - (pageYOffset + window.innerHeight) < 0 && this.state === true) {
-        this.state = false;
-        this.sortOnServer();
-      }
-    })
+  }
+
+  createListenerForServer() {
+    this.state = true;
+    window.addEventListener('scroll', this.onWindowScroll)
+  }
+
+  onWindowScroll = event => {
+    if (this.element.clientHeight - (pageYOffset + window.innerHeight) < 0 && this.state === true) {
+      this.state = false;
+      this.sortOnServer();
+    }
   }
 
   onSortClick = event => {
@@ -172,11 +183,15 @@ export default class SortableTable {
   }
 
   async sortOnServer(fieldValue = this.fieldValue, orderValue = this.orderValue) {
-    this.newLength = 30;
+
     this.fieldValue = fieldValue;
     this.orderValue = orderValue;
-    await fetchJson(`${BACKEND_URL}/${this.url}?_embed=subcategory.category&_sort=${this.fieldValue}&_order=${this.orderValue}&_start=${this.columnListSize}&_end=${this.columnListSize + this.newLength}`)
-      .then(json => this.data = json);
+
+    try {
+      this.data = await this.loadData();
+    } catch (error) {
+      console.log(error.message);
+    }
 
     if (this.state === true) {
       this.subElements.body.innerHTML = this.getBodyList();
@@ -187,6 +202,20 @@ export default class SortableTable {
 
     this.state = true;
 
+  }
+
+  async loadData() {
+    this.url.searchParams.set('_embed', 'subcategory.category');
+    this.url.searchParams.set('_sort', this.fieldValue);
+    this.url.searchParams.set('_order', this.orderValue);
+    this.url.searchParams.set('_start', this.columnListSize);
+    this.url.searchParams.set('_end', this.columnListSize + this.newLength);
+
+    try {
+      return await fetchJson(this.url);
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   addColumnList() {
@@ -248,5 +277,6 @@ export default class SortableTable {
     this.remove();
     this.element = null;
     this.subElements = {};
+    window.removeEventListener('scroll', this.onWindowScroll);
   }
 }
