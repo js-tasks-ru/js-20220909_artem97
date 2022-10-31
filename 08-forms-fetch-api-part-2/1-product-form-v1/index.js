@@ -9,7 +9,7 @@ const ITEM_URL = 'api/rest/products'
 export default class ProductForm {
 
   element;
-  subElement;
+  subElements;
 
   defaultFormData = {
     title: '',
@@ -147,7 +147,19 @@ export default class ProductForm {
   }
 
   uploadImage() {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', async () => {
+        const uploader = new ImageUploader()
 
+        try {
+          const [file] = fileInput.files;
+          const result = await uploader.upload(file);
+          console.log("ok - " + result);
+        } catch (error) {
+          console.log("error - " + result);
+        }
+      }
+    )
   }
 
   getTemplate() {
@@ -321,5 +333,7 @@ export default class ProductForm {
     this.remove();
     this.element = null;
     this.subElements = {};
+    this.onSubmit = null;
+    this.uploadImage = null;
   }
 }
