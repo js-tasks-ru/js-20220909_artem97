@@ -157,12 +157,17 @@ export default class ProductForm {
     const imagesList = this.element.querySelector('.sortable-list');
     const input = document.createElement('input');
     input.type = 'file';
+    input.accept = 'image/*';
 
     input.addEventListener('change', async () => {
       const [file] = input.files;
       console.log(file)
-      const result = await this.loadImage(file);
+      const result = await this.loadImage(file, imagesList);
       imagesList.append(this.getImageElement(result['data']['link'], result['data']['id']));
+
+      imagesList.classList.remove('is-loading');
+      imagesList.disabled = false;
+      input.remove();
     }, {
       signal: this.controller.signal
     })
@@ -170,11 +175,13 @@ export default class ProductForm {
     input.click();
   }
 
-  async loadImage(file) {
+  async loadImage(file, imagesList) {
     const formData = new FormData();
 
     formData.append('image', file);
 
+    imagesList.classList.add('is-loading');
+    imagesList.disabled = true;
     try {
       const response = await fetch('https://api.imgur.com/3/image', {
         method: 'POST',
