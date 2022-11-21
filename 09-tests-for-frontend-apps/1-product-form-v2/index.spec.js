@@ -3,7 +3,7 @@ import ProductForm from './index.js';
 import productData from './__mocks__/product-data.js';
 import categoriesData from './__mocks__/categories-data.js';
 
-describe('tests-for-frontend-apps/product-form-v2', () => {
+describe('forms-fetch-api-part-2/product-form-v1', () => {
   let productFormComponent;
 
   beforeEach(async () => {
@@ -50,7 +50,7 @@ describe('tests-for-frontend-apps/product-form-v2', () => {
 
     expect(subcategory.children[0]).toHaveTextContent(categoriesNames[0]);
     expect(subcategory.children[subcategory.children.length - 1])
-    .toHaveTextContent(categoriesNames[categoriesNames.length - 1]);
+      .toHaveTextContent(categoriesNames[categoriesNames.length - 1]);
   });
 
   it('should render product data correctly', () => {
@@ -96,7 +96,7 @@ describe('tests-for-frontend-apps/product-form-v2', () => {
     const spyDispatchEvent = jest.spyOn(productFormComponent.element, 'dispatchEvent');
 
     fetchMock
-    .once(JSON.stringify({status: 'ok'}));
+      .once(JSON.stringify({status: 'ok'}));
 
     await productFormComponent.save();
 

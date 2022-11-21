@@ -1087,3 +1087,5 @@ export const bestsellers = [
     "sales": 36
   }
 ];
+export default class data {
+}
